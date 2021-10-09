@@ -2,6 +2,9 @@ import os
 
 
 class VariableNaming:
+    """
+    Class to standardize the naming convention of AWS resources like, username, groups and buckets.
+    """
 
     def __init__(self, project_slug, environment, *args, **kwargs):
         self.base_name = project_slug.replace('_', '-')
