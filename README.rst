@@ -22,6 +22,12 @@ Django Project Config
 
 Scripts to configure AWS, Github and Heroku.
 
+I tried to automate the process of creating a new Django project and wiring it up using Ansible.
+It didn't quite worked the way I wanted. Maybe because of my limited knoledge of Ansible.
+
+So I decided to go the way of running terminal commands.
+
+
 
 * Free software: MIT license
 * Documentation: https://django-project-config.readthedocs.io.

@@ -1,0 +1,4 @@
+#!/bin/sh
+export POLICYARN=$(aws iam list-policies --query 'Policies[?PolicyName==`{{ bucket_name }}-policy`].{ARN:Arn}' --output text)
+echo $POLICYARN
+aws iam attach-group-policy  --group-name {{ aws_group }} --policy-arn $POLICYARN
