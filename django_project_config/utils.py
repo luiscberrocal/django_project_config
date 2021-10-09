@@ -24,10 +24,12 @@ class Colors:
     UNDERLINE = '\033[4m'
 
 
-def print_title(title, sep='-', length=80):
+def print_title(title, sep='-', length=80, **kwargs):
+    color = kwargs.get('colors', '')
+    end_color = '' if color == '' else Colors.ENDC
     len_title = len(title) + 2
     deco = sep * int((length - len_title) / 2)
-    display = f'{deco} {title} {deco}'
+    display = f'{color}{deco} {title} {deco}{end_color}'
     print(display[:length])
 
 
@@ -43,12 +45,14 @@ def display_results(results, errors, **kwargs):
     title = kwargs.get('title', 'Results')
     length = kwargs.get('length', 80)
     sep = kwargs.get('sep', '-')
+
     print_title(title, sep, length=length)
     for i, result in enumerate(results):
         print(f'{i + 1} {result}')
-    print(sep * length)
+    print_line()
     if len(errors) > 0:
-        print(f'{Colors.WARNING}-{Colors.ENDC}' * length)
+        print_title(f'ERRORS for {title}')
+        print(f'{Colors.FAIL}-{Colors.ENDC}' * length)
         for i, error in enumerate(errors):
             print(f'{i + 1} {error}')
 

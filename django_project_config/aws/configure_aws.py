@@ -5,7 +5,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 
 from django_project_config.naming import VariableNaming
 from django_project_config.templating import template_helper
-from django_project_config.utils import run_command, display_results, print_title
+from django_project_config.utils import run_command, display_results, print_title, print_line
 
 
 def run_piped_commands(command, encoding='utf-8'):
@@ -103,10 +103,12 @@ def create_policy_arn_script(filename, bucket_name, aws_group, **kwargs):
 
     template_name = 'grant_s3.sh.j2'
     template_data = {'bucket_name': bucket_name, "aws_group": aws_group}
-    template_helper.write(filename, template_name, **kwargs)
+    template_helper.write(filename, template_name, **template_data)
     if verbose:
+        print_title('CREATE POLICY ARN SCRIPT')
         content = template_helper.render(template_name, **template_data)
         print(content)
+        print_line()
 
 
 def execute_arn_script(filename, **kwargs):
@@ -114,7 +116,7 @@ def execute_arn_script(filename, **kwargs):
     commands = f'sh {filename}'
     results, errors = run_command(commands)
     if verbose:
-        display_results(results, errors)
+        display_results(results, errors, title='EXECUTE ARN SCRIPT')
 
 
 def create_user(username, **kwargs):
