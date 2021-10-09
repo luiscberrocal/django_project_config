@@ -1,8 +1,10 @@
 import subprocess
+from pathlib import Path
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from ..utils import run_command, display_results
+from django_project_config.naming import VariableNaming
+from django_project_config.utils import run_command, display_results
 
 
 def run_piped_commands(command, encoding='utf-8'):
@@ -164,8 +166,14 @@ def add_user_to_group(username, aws_group, **kwargs):
 
 if __name__ == '__main__':
     slug = 'home_automation'
-    # create_bucket(project_slug=slug, dry_run=True)
-    bucket_pattern = slug.replace('_', '-')
+    environment = 'staging'
+    ROOT_FOLDER = Path(__file__).parent.parent.parent
+    print(f'>>> {ROOT_FOLDER}')
+    target_folder = ROOT_FOLDER / 'output'
+    naming = VariableNaming(slug, environment, folder=target_folder)
+    bucket = naming.bucket_name()
+    # STEP 01 Create Bucket
+    create_bucket(bucket, verbose=True)
     # get_buckets(bucket_pattern)
     # group_name = create_aws_group(slug, verbose=True)
     bucket_name = f"{slug.replace('_', '-')}-staging-bucket"
@@ -183,4 +191,4 @@ if __name__ == '__main__':
 
     access_filename = f'../output/{aws_username}-access.json'
     # create_access_key(aws_username, access_filename, verbose=True)
-    add_user_to_group(aws_username, aws_group, verbose=True)
+    #add_user_to_group(aws_username, aws_group, verbose=True)
