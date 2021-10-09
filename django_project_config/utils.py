@@ -17,7 +17,7 @@ class Colors:
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
     OKGREEN = '\033[92m'
-    WARNING = '\033[93m' #Yellow
+    WARNING = '\033[93m'  # Yellow
     FAIL = '\033[91m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
@@ -31,6 +31,14 @@ def print_title(title, sep='-', length=80):
     print(display[:length])
 
 
+def print_line(sep='-', length=80, **kwargs):
+    color = kwargs.get('color')
+    if color is None:
+        print(sep * length)
+    else:
+        print(f'{color}{sep}{Colors.ENDC}' * length)
+
+
 def display_results(results, errors, **kwargs):
     title = kwargs.get('title', 'Results')
     length = kwargs.get('length', 80)
@@ -38,8 +46,9 @@ def display_results(results, errors, **kwargs):
     print_title(title, sep, length=length)
     for i, result in enumerate(results):
         print(f'{i + 1} {result}')
-    print(sep*length)
+    print(sep * length)
     if len(errors) > 0:
         print(f'{Colors.WARNING}-{Colors.ENDC}' * length)
         for i, error in enumerate(errors):
-            print(f'{i+1} {error}')
+            print(f'{i + 1} {error}')
+

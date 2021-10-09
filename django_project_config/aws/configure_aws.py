@@ -4,7 +4,8 @@ from pathlib import Path
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from django_project_config.naming import VariableNaming
-from django_project_config.utils import run_command, display_results
+from django_project_config.templating import template_helper
+from django_project_config.utils import run_command, display_results, print_title
 
 
 def run_piped_commands(command, encoding='utf-8'):
@@ -43,10 +44,10 @@ def create_bucket(bucket_name, **kwargs):
     return bucket_name
 
 
-def create_aws_group(group, **kwargs):
+def create_aws_group(group_name, **kwargs):
     """aws iam create-group --group-name {{ aws_staging_group }}"""
     verbose = kwargs.get('verbose', False)
-    commands = f'aws iam create-group --group-name {group}'
+    commands = f'aws iam create-group --group-name {group_name}'
     results, errors = run_command(commands)
     if verbose:
         display_results(results, errors, title='CREATE AWS GROUP')
@@ -56,20 +57,21 @@ def create_aws_group(group, **kwargs):
 def create_policy_file(filename, bucket_name, **kwargs):
     verbose = kwargs.get('verbose', False)
     env = Environment(
-        loader=PackageLoader("scripts"),
+        loader=PackageLoader("django_project_config"),
         autoescape=select_autoescape()
     )
 
     template = env.get_template("s3_policy.json.j2")
     content = template.render(aws_staging_bucket=bucket_name)
     if verbose:
+        print_title('CREATE POLICY FILE')
         print(content)
     with open(filename, 'w') as json_file:
         json_file.write(content)
     return content
 
 
-def create_policy_file(filename, bucket_name, **kwargs):
+def create_policy(filename, bucket_name, **kwargs):
     """
    "aws iam create-policy --policy-name {{ aws_staging_bucket }}-policy --policy-document file://./output/{{ aws_staging_bucket }}_policy.json"
     :return: 
@@ -79,7 +81,7 @@ def create_policy_file(filename, bucket_name, **kwargs):
                f" --policy-document file://{filename}"
     results, errors = run_command(commands)
     if verbose:
-        display_results(results, errors)
+        display_results(results, errors, title='CREATE POLICY')
 
 
 def get_policy_arn(bucket_name, **kwargs):
@@ -98,18 +100,13 @@ def get_policy_arn(bucket_name, **kwargs):
 
 def create_policy_arn_script(filename, bucket_name, aws_group, **kwargs):
     verbose = kwargs.get('verbose', False)
-    env = Environment(
-        loader=PackageLoader("scripts"),
-        autoescape=select_autoescape()
-    )
 
-    template = env.get_template("grant_s3.sh.j2")
-    content = template.render(bucket_name=bucket_name, aws_group=aws_group)
+    template_name = 'grant_s3.sh.j2'
+    template_data = {'bucket_name': bucket_name, "aws_group": aws_group}
+    template_helper.write(filename, template_name, **kwargs)
     if verbose:
+        content = template_helper.render(template_name, **template_data)
         print(content)
-    with open(filename, 'w') as json_file:
-        json_file.write(content)
-    return content
 
 
 def execute_arn_script(filename, **kwargs):
@@ -172,23 +169,28 @@ if __name__ == '__main__':
     target_folder = ROOT_FOLDER / 'output'
     naming = VariableNaming(slug, environment, folder=target_folder)
     bucket = naming.bucket_name()
+    group = naming.group()
     # STEP 01 Create Bucket
-    create_bucket(bucket, verbose=True)
-    # get_buckets(bucket_pattern)
-    # group_name = create_aws_group(slug, verbose=True)
-    bucket_name = f"{slug.replace('_', '-')}-staging-bucket"
-    policy_filename = f'../output/{bucket_name}-s3-policy.json'
-    # create_policy_file(policy_filename, bucket_name)
-    # create_policy(bucket_name, policy_filename, verbose=True)
-    aws_group = 'home-automation-staging-group'
+    if 1 == 0:
+        create_bucket(bucket, verbose=True)
+    # STEP 02 Create AWS buckets
+    if 1 == 0:
+        create_aws_group(group, verbose=True)
 
-    script_filename = f'../output/{bucket_name}-arn.sh'
+    # STEP 03 Create bucket policy
+    if 1 == 0:
+        create_policy_file(naming.policy_filename(), bucket, verbose=True)
+        create_policy(naming.policy_filename(), bucket, verbose=True)
+    # STEP 04 Create an assing arn policy
+    if 1 == 1:
+        create_policy_arn_script(naming.arn_script_filename(), bucket, group, verbose=True)
+        execute_arn_script(naming.arn_script_filename(), verbose=True)
+
     # create_policy_arn_script(script_filename, bucket_name, aws_group)
-
     # execute_arn_script(script_filename, verbose=True)
     aws_username = 'home-automation-staging-user'
     # create_user(aws_username, verbose=True)
 
     access_filename = f'../output/{aws_username}-access.json'
     # create_access_key(aws_username, access_filename, verbose=True)
-    #add_user_to_group(aws_username, aws_group, verbose=True)
+    # add_user_to_group(aws_username, aws_group, verbose=True)
