@@ -45,14 +45,14 @@ def display_results(results, errors, **kwargs):
     title = kwargs.get('title', 'Results')
     length = kwargs.get('length', 80)
     sep = kwargs.get('sep', '-')
-
-    print_title(title, sep, length=length)
-    for i, result in enumerate(results):
-        print(f'{i + 1} {result}')
-    print_line()
+    if len(results) > 0:
+        print_title(title, sep, length=length)
+        for i, result in enumerate(results):
+            print(f'{i + 1} {result}')
+        print_line()
     if len(errors) > 0:
-        print_title(f'ERRORS for {title}')
+        print_title(f'ERRORS for {title}', colors=Colors.FAIL)
         print(f'{Colors.FAIL}-{Colors.ENDC}' * length)
         for i, error in enumerate(errors):
-            print(f'{i + 1} {error}')
+            print(f'{Colors.FAIL}{i + 1} {error}{Colors.ENDC}')
 

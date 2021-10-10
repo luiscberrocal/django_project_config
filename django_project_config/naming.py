@@ -3,7 +3,8 @@ import os
 
 class VariableNaming:
     """
-    Class to standardize the naming convention of AWS resources like, username, groups and buckets.
+    Class to standardize the naming convention of AWS resources like, username, groups and buckets and
+    Herouku resources.
     """
 
     def __init__(self, project_slug, environment, *args, **kwargs):
@@ -12,14 +13,17 @@ class VariableNaming:
         self.folder = kwargs.get('folder', None)
 
     def username(self):
+        """AWS Username"""
         username = f'{self.base_name}-{self.environment}-user'
         return username
 
     def bucket_name(self):
+        """AWS S3 bucket name"""
         bucket_name = f'{self.base_name}-{self.environment}-bucket'
         return bucket_name
 
     def group(self):
+        """AWS Group name"""
         group = f'{self.base_name}-{self.environment}-group'
         return group
 
@@ -45,3 +49,7 @@ class VariableNaming:
         username = self.username()
         filename = self._build_filename(username, 'access', 'json', folder=folder)
         return filename
+
+    def heroku_app_name(self):
+        app_name = f'{self.base_name}-{self.environment}'
+        return app_name
