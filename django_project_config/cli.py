@@ -1,6 +1,9 @@
 """Console script for django_project_config."""
 import argparse
 import sys
+from pathlib import Path
+
+from django_project_config.heroku import t
 
 
 def main():
@@ -16,4 +19,16 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+    #sys.exit(main())  # pragma: no cover
+    ROOT_FOLDER = Path(__file__).parent.parent.parent
+    print(f'>>> Root: {ROOT_FOLDER}')
+    args = dict()
+    args['verbose'] = True
+    args['base_slug'] = 'home_auto_507_pty'
+    args['environment'] = 'staging'
+    args['target_folder'] = ROOT_FOLDER / 'output'
+    args['create_heroku_app'] = False
+    args['create_postgresql_db'] = True
+    print(t.YY)
+    #run_heroku_config(**args)
+

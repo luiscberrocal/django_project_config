@@ -27,7 +27,7 @@ def create_postgresql_db(postgres_level, **kwargs):
         display_results(results, errors, title='CREATE POSTGRES DATABASE')
 
 
-def run_main(**kwargs):
+def run_heroku_config(**kwargs):
     heroku_slug = kwargs['base_slug']
     environment = kwargs['environment']
     verbose = kwargs['verbose']
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     args['base_slug'] = 'home_auto_507_pty'
     args['environment'] = 'staging'
     args['target_folder'] = ROOT_FOLDER / 'output'
-    args['create_heroku_app'] = True
-    args['create_postgresql_db'] = False
+    args['create_heroku_app'] = False
+    args['create_postgresql_db'] = True
 
-    run_main(**args)
+    run_heroku_config(**args)
