@@ -129,7 +129,7 @@ def create_user(username, **kwargs):
     commands = f"aws iam create-user --user-name {username}"
     results, errors = run_command(commands)
     if verbose:
-        display_results(results, errors)
+        display_results(results, errors, title='CREATE USER')
 
 
 def create_access_key(username, filename, **kwargs):
@@ -145,9 +145,10 @@ def create_access_key(username, filename, **kwargs):
                f"--output json"
     results, errors = run_command(commands)
     if verbose:
-        display_results(results, errors)
+        display_results(results, errors, title='CREATE ACCESS KEY')
     with open(filename, 'w') as txt_file:
-        txt_file.write(results)
+        for result in results:
+            txt_file.write(result)
 
 
 def add_user_to_group(username, aws_group, **kwargs):
@@ -172,27 +173,28 @@ if __name__ == '__main__':
     naming = VariableNaming(slug, environment, folder=target_folder)
     bucket = naming.bucket_name()
     group = naming.group()
+    username = naming.username()
     # STEP 01 Create Bucket
     if 1 == 0:
         create_bucket(bucket, verbose=True)
     # STEP 02 Create AWS buckets
     if 1 == 0:
         create_aws_group(group, verbose=True)
-
     # STEP 03 Create bucket policy
     if 1 == 0:
         create_policy_file(naming.policy_filename(), bucket, verbose=True)
         create_policy(naming.policy_filename(), bucket, verbose=True)
     # STEP 04 Create an assing arn policy
-    if 1 == 1:
+    if 1 == 0:
         create_policy_arn_script(naming.arn_script_filename(), bucket, group, verbose=True)
         execute_arn_script(naming.arn_script_filename(), verbose=True)
+    # STEP 05 Creating user
+    if 1 == 0:
+        create_user(username, verbose=True)
+    # STEP 06 Create access ky
+    if 1 == 0:
+        create_access_key(username, naming.access_filename(), verbose=True)
 
-    # create_policy_arn_script(script_filename, bucket_name, aws_group)
-    # execute_arn_script(script_filename, verbose=True)
-    aws_username = 'home-automation-staging-user'
-    # create_user(aws_username, verbose=True)
-
-    access_filename = f'../output/{aws_username}-access.json'
-    # create_access_key(aws_username, access_filename, verbose=True)
-    # add_user_to_group(aws_username, aws_group, verbose=True)
+    # STEP 07 Add user to the group
+    if 1 == 1:
+        add_user_to_group(username, group, verbose=True)
