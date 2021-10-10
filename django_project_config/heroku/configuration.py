@@ -30,6 +30,18 @@ def create_postgresql_db(postgres_level, **kwargs):
         display_results(results, errors, title='CREATE POSTGRES DATABASE')
 
 
+def create_redis(redis_level, redis_name, **kwargs):
+    """
+    heroku addons:create heroku-redis:hobby-dev -a {{ django_project_slug | replace('_','-') }}-staging
+    """
+    verbose = kwargs.get('verbose', False)
+    cwd = kwargs.get('run_folder')
+    command = f'heroku addons:create heroku-redis:{redis_level} -a {redis_name}'
+    results, errors = run_command(command, cwd=cwd)
+    if verbose:
+        display_results(results, errors, title='CREATE REDIS')
+
+
 def run_heroku_config(**kwargs):
     heroku_slug = kwargs['base_slug']
     environment = kwargs['environment']
@@ -48,6 +60,14 @@ def run_heroku_config(**kwargs):
             msg = f'Unsupported environment {environment}'
             raise DjangoProjectConfigException(msg)
         create_postgresql_db(level, verbose=verbose, run_folder=run_folder)
+    # STEP 03 Create REDIS
+    if kwargs.get('create_redis'):
+        if environment == 'staging':
+            level = 'hobby-dev'
+        else:
+            msg = f'Unsupported environment {environment}'
+            raise DjangoProjectConfigException(msg)
+        create_redis(level, naming.redis_name(), verbose=verbose, run_folder=run_folder)
 
 
 if __name__ == '__main__':
@@ -59,7 +79,8 @@ if __name__ == '__main__':
     args['environment'] = 'staging'
     args['target_folder'] = ROOT_FOLDER / 'output'
     args['create_heroku_app'] = False
-    args['create_postgresql_db'] = True
+    args['create_postgresql_db'] = False
+    args['create_redis'] = True
     args['run_folder'] = ROOT_FOLDER
     print(f'>>>> {ROOT_FOLDER}')
     run_heroku_config(**args)
