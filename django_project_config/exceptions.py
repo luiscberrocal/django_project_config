@@ -1,0 +1,3 @@
+
+class DjangoProjectConfigException(Exception):
+    pass

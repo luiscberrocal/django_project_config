@@ -1,0 +1,92 @@
+- name: Setting host facts using key=value pairs, note that this always creates strings or booleans
+  set_fact:
+    heroku_staging_app: "{{ django_project_slug | replace('_','-') }}-staging"
+    heroku_prod_app: "{{ django_project_slug | replace('_','-') }}"
+
+- name: Create heroku staging app
+  shell: heroku apps:create {{ heroku_staging_app }}
+  args:
+    chdir: "{{ django_project_folder }}"
+
+- name: Create heroku postgres database
+  shell: heroku addons:create heroku-postgresql:hobby-dev
+  args:
+    chdir: "{{ django_project_folder }}"
+
+- name: Create heroku redis
+  shell: heroku addons:create heroku-redis:hobby-dev -a {{ django_project_slug | replace('_','-') }}-staging
+  args:
+    chdir: "{{ django_project_folder }}"
+AKIAXAEJSAV3GRFIB3XU
+- name: Create heroku mailgun
+  shell: heroku addons:create mailgun:starter
+  args:
+    chdir: "{{ django_project_folder }}"
+
+- name: Load user access keys ./output/{{ aws_staging_user }}-access.json
+  include_vars:
+    file: "./output/{{ aws_staging_user }}-access.json"
+    name: access_keys
+
+- debug:
+    msg: "AK {{ access_keys.AccessKey.AccessKeyId | md5}} S: {{ access_keys.AccessKey.AccessKeyId | sha1}}"
+
+- name: Setting Heroku DJANGO_AWS_ACCESS_KEY_ID
+  shell: "heroku config:set DJANGO_AWS_ACCESS_KEY_ID={{ access_keys.AccessKey.AccessKeyId }} --app {{heroku_staging_app}} "
+  register: heroku_result
+- debug:
+    msg: "{{ heroku_result }}"
+- name: Setting Heroku DJANGO_AWS_SECRET_ACCESS_KEY
+  shell: "heroku config:set DJANGO_AWS_SECRET_ACCESS_KEY={{ access_keys.AccessKey.SecretAccessKey }} --app {{heroku_staging_app}}"
+
+- name: Setting Heroku DJANGO_AWS_STORAGE_BUCKET_NAME
+  shell: "heroku config:set DJANGO_AWS_STORAGE_BUCKET_NAME={{ aws_staging_bucket }} --app {{heroku_staging_app}}"
+
+- name: Setting Heroku DJANGO_SECRET_KEY
+  shell: "heroku config:set DJANGO_SECRET_KEY={{ aws_staging_bucket | sha1}} --app {{heroku_staging_app}}"
+
+- name: Setting Heroku DJANGO_ADMIN_URL
+  shell: "heroku config:set DJANGO_ADMIN_URL=avengers/ --app {{heroku_staging_app}}"
+
+- name: Setting Heroku ENVIRONMENT_ADMIN_CSS
+  shell: "heroku config:set ENVIRONMENT_ADMIN_CSS=css/admin-staging.css --app {{heroku_staging_app}}"
+
+- name: Setting Heroku ENVIRONMENT_NAME
+  shell: "heroku config:set ENVIRONMENT_NAME=STAGING --app {{heroku_staging_app}}"
+
+- name: Setting Heroku USE_DOCKER
+  shell: "heroku config:set USE_DOCKER=no --app {{heroku_staging_app}}"
+
+- name: Sleep for 300 seconds and continue with play
+  wait_for:
+    timeout: 300
+  delegate_to: localhost
+
+- name: Get Heroku REDIS_URL
+  shell: "heroku config --app {{heroku_staging_app}} | grep REDIS_URL:"
+  register: create_redis
+  until: create_redis is not failed
+  retries: 5
+
+- name: Set REDIS_URL to celery_url
+  set_fact:
+    celery_url: "{{ create_redis.stdout | regex_search(regexp,'\\1') | first }}"
+  vars:
+    regexp: 'REDIS_URL\:\s+(redis:\/\/:[\w\-@\.]+:\d+)'
+#- debug:
+#    msg: "CELERY_BROKER_URL: {{ celery_url }}"
+
+- name: Setting Heroku CELERY_BROKER_URL
+  shell: "heroku config:set CELERY_BROKER_URL={{ celery_url }} --app {{heroku_staging_app}}"
+
+- name: Setting Heroku DJANGO_SETTINGS_MODULE
+  shell: "heroku config:set DJANGO_SETTINGS_MODULE=config.settings.production --app {{heroku_staging_app}}"
+#
+- name: Setting Heroku DJANGO_ALLOWED_HOSTS
+  shell: "heroku config:set DJANGO_ALLOWED_HOSTS={{ heroku_staging_app }}.herokuapp.com --app {{heroku_staging_app}}"
+
+- name: Push app to Heroku
+  shell: "git push heroku master"
+  args:
+    chdir: "{{ django_project_folder }}"
+
