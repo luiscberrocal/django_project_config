@@ -3,7 +3,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from django_project_config.heroku import t
+from django_project_config.heroku.configuration import run_heroku_config
 
 
 def main():
@@ -15,11 +15,6 @@ def main():
     print("Arguments: " + str(args._))
     print("Replace this message by putting your code into "
           "django_project_config.cli.main")
-    return 0
-
-
-if __name__ == "__main__":
-    #sys.exit(main())  # pragma: no cover
     ROOT_FOLDER = Path(__file__).parent.parent.parent
     print(f'>>> Root: {ROOT_FOLDER}')
     args = dict()
@@ -29,6 +24,8 @@ if __name__ == "__main__":
     args['target_folder'] = ROOT_FOLDER / 'output'
     args['create_heroku_app'] = False
     args['create_postgresql_db'] = True
-    print(t.YY)
-    #run_heroku_config(**args)
+    run_heroku_config(**args)
 
+
+if __name__ == "__main__":
+    sys.exit(main())  # pragma: no cover

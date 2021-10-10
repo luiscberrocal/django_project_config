@@ -53,3 +53,7 @@ class VariableNaming:
     def heroku_app_name(self):
         app_name = f'{self.base_name}-{self.environment}'
         return app_name
+
+    def redis_name(self):
+        redis = f'{self.base_name}-{self.environment}'
+        return redis

@@ -17,7 +17,6 @@
   shell: heroku addons:create heroku-redis:hobby-dev -a {{ django_project_slug | replace('_','-') }}-staging
   args:
     chdir: "{{ django_project_folder }}"
-AKIAXAEJSAV3GRFIB3XU
 - name: Create heroku mailgun
   shell: heroku addons:create mailgun:starter
   args:
