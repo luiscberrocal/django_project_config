@@ -1,12 +1,16 @@
 import subprocess
 
 
-def run_command(command, encoding='utf-8', eol='\n'):
+def run_command(command, encoding='utf-8', eol='\n', **kwargs):
+    cwd = kwargs.get('cwd')
+    command_data = dict()
+    command_data['stdout'] = subprocess.PIPE
+    command_data['stderr'] = subprocess.PIPE
+    command_data['stdin'] = subprocess.PIPE
+    if cwd:
+        command_data['cwd'] = cwd
     commands = command.split(' ')
-    result = subprocess.run(commands,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            stdin=subprocess.PIPE)
+    result = subprocess.run(commands, **command_data)
     result_lines = result.stdout.decode(encoding).split(eol)[:-1]
     error_lines = result.stderr.decode(encoding).split(eol)[:-1]
     return result_lines, error_lines
