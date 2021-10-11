@@ -1,5 +1,7 @@
+import hashlib
 import json
 from pathlib import Path
+from time import time
 
 from django_project_config.exceptions import DjangoProjectConfigException
 from django_project_config.naming import VariableNaming
@@ -55,11 +57,31 @@ def set_aws_variables(bucket_name, app_name, access_source_file, **kwargs):
     django_variables['DJANGO_AWS_ACCESS_KEY_ID'] = access_data['AccessKey']['AccessKeyId']
     django_variables['DJANGO_AWS_SECRET_ACCESS_KEY'] = access_data['AccessKey']['SecretAccessKey']
     django_variables['DJANGO_AWS_STORAGE_BUCKET_NAME'] = bucket_name
+    set_heroku_variables(django_variables, app_name, cwd, verbose)
+
+
+def set_heroku_variables(django_variables, app_name, cwd, verbose):
     for key, item in django_variables.items():
         command = f"heroku config:set {key}={item} --app {app_name}"
         results, errors = run_command(command, cwd=cwd)
         if verbose:
             display_results(results, errors, title=f'CREATE {key} for {app_name}')
+
+
+def set_secrets(app_name, admin_url=None, **kwargs):
+    cwd = kwargs.get('run_folder')
+    verbose = kwargs.get('verbose', False)
+    seed = kwargs.get('seed', str(time()))
+    admin_len = kwargs.get('admin_len', 16)
+    hashing = hashlib.sha1()
+    hashing.update(f'{seed}'.encode('utf-8'))
+
+    django_variables = dict()
+    django_variables['DJANGO_SECRET_KEY'] = hashing.hexdigest()
+    if admin_url is None:
+        hashing.update(seed.encode('utf-8'))
+        django_variables['DJANGO_ADMIN_URL'] = hashing.hexdigest()[:admin_len]
+    set_heroku_variables(django_variables, app_name, cwd, verbose)
 
 
 def run_heroku_config(**kwargs):
@@ -92,6 +114,9 @@ def run_heroku_config(**kwargs):
     if kwargs.get('set_aws_variables'):
         set_aws_variables(kwargs['bucket_name'], naming.heroku_app_name(), kwargs['aws_access_file'],
                           verbose=verbose, run_folder=run_folder)
+    # STEP 05 Create secrets and admin url
+    if kwargs.get('set_secrets'):
+        set_secrets(naming.heroku_app_name(), verbose=verbose)
 
 
 if __name__ == '__main__':
@@ -105,7 +130,8 @@ if __name__ == '__main__':
     args['create_heroku_app'] = False
     args['create_postgresql_db'] = False
     args['create_redis'] = False
-    args['set_aws_variables'] = True
+    args['set_aws_variables'] = False
+    args['set_secrets'] = True
     args['bucket_name'] = 'home-automation-staging-bucket'
     args['aws_access_file'] = ROOT_FOLDER / 'output/home-automation-staging-user-access.json'
 
