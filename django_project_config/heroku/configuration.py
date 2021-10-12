@@ -4,6 +4,7 @@ from pathlib import Path
 from time import time
 
 from django_project_config.exceptions import DjangoProjectConfigException
+from django_project_config.heroku.utils import get_variables
 from django_project_config.naming import VariableNaming
 from django_project_config.utils import run_command, display_results
 
@@ -84,6 +85,16 @@ def set_secrets(app_name, admin_url=None, **kwargs):
     set_heroku_variables(django_variables, app_name, cwd, verbose)
 
 
+def create_celery_broker_url(app_name, **kwargs):
+    cwd = kwargs.get('run_folder')
+    verbose = kwargs.get('verbose', False)
+    redis_key = kwargs.get('redis_key', 'REDIS_TLS_URL')
+    heroku_variables = get_variables(app_name)
+
+    django_variables = dict()
+    django_variables['CELERY_BROKER_URL'] = heroku_variables[redis_key]
+    set_heroku_variables(django_variables, app_name, cwd, verbose)
+
 def run_heroku_config(**kwargs):
     heroku_slug = kwargs['base_slug']
     environment = kwargs['environment']
@@ -117,6 +128,8 @@ def run_heroku_config(**kwargs):
     # STEP 05 Create secrets and admin url
     if kwargs.get('set_secrets'):
         set_secrets(naming.heroku_app_name(), verbose=verbose)
+    if kwargs.get(''): #FIXME
+        create_celery_broker_url(naming.heroku_app_name(),verbose=verbose)
 
 
 if __name__ == '__main__':
@@ -131,7 +144,8 @@ if __name__ == '__main__':
     args['create_postgresql_db'] = False
     args['create_redis'] = False
     args['set_aws_variables'] = False
-    args['set_secrets'] = True
+    args['set_secrets'] = False
+    args['create_celery_broker_url']= True
     args['bucket_name'] = 'home-automation-staging-bucket'
     args['aws_access_file'] = ROOT_FOLDER / 'output/home-automation-staging-user-access.json'
 
