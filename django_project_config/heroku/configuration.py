@@ -128,8 +128,14 @@ def run_heroku_config(**kwargs):
     # STEP 05 Create secrets and admin url
     if kwargs.get('set_secrets'):
         set_secrets(naming.heroku_app_name(), verbose=verbose)
-    if kwargs.get(''): #FIXME
+    # STEP 06 Create Celery Broker url
+    if kwargs.get('create_celery_broker_url'):
         create_celery_broker_url(naming.heroku_app_name(),verbose=verbose)
+
+    # STEP 07 set other variables
+    django_vars = dict()
+    django_vars['DJANGO_SETTINGS_MODULE'] = 'config.settings.production'
+
 
 
 if __name__ == '__main__':
