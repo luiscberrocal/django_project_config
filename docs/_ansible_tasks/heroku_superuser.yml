@@ -1,0 +1,28 @@
+#- name: Sleep for 300 seconds and continue with play
+#  wait_for:
+#    timeout: 300
+#  delegate_to: localhost
+
+- name: Setting host facts using key=value pairs, note that this always creates strings or booleans
+  set_fact: heroku_staging_app={{ django_project_slug | replace('_','-') }}-staging
+
+- name: Setting Heroku DJANGO_SUPERUSER_USERNAME
+  shell: "heroku config:set DJANGO_SUPERUSER_USERNAME={{credentials.dev.username}} --app {{heroku_staging_app}}"
+
+- name: Setting Heroku DJANGO_SUPERUSER_EMAIL
+  shell: "heroku config:set DJANGO_SUPERUSER_EMAIL={{credentials.dev.email}} --app {{heroku_staging_app}}"
+
+- name: Setting Heroku DJANGO_SUPERUSER_PASSWORD
+  shell: "heroku config:set DJANGO_SUPERUSER_PASSWORD={{credentials.dev.pwd}}  --app {{heroku_staging_app}}"
+
+- name: Create super user
+  shell: "heroku run  --app {{heroku_staging_app}} python manage.py createsuperuser --no-input"
+
+- name: Unsetting Heroku DJANGO_SUPERUSER_USERNAME
+  shell: "heroku config:unset DJANGO_SUPERUSER_USERNAME --app {{heroku_staging_app}}"
+
+- name: Unsetting Heroku DJANGO_SUPERUSER_EMAIL
+  shell: "heroku config:unset DJANGO_SUPERUSER_EMAIL --app {{heroku_staging_app}}"
+
+- name: Unsetting Heroku DJANGO_SUPERUSER_PASSWORD
+  shell: "heroku config:unset DJANGO_SUPERUSER_PASSWORD --app {{heroku_staging_app}}"
