@@ -95,6 +95,7 @@ def create_celery_broker_url(app_name, **kwargs):
     django_variables['CELERY_BROKER_URL'] = heroku_variables[redis_key]
     set_heroku_variables(django_variables, app_name, cwd, verbose)
 
+
 def run_heroku_config(**kwargs):
     heroku_slug = kwargs['base_slug']
     environment = kwargs['environment']
@@ -130,13 +131,14 @@ def run_heroku_config(**kwargs):
         set_secrets(naming.heroku_app_name(), verbose=verbose)
     # STEP 06 Create Celery Broker url
     if kwargs.get('create_celery_broker_url'):
-        create_celery_broker_url(naming.heroku_app_name(),verbose=verbose)
+        create_celery_broker_url(naming.heroku_app_name(), verbose=verbose)
 
     # STEP 07 set other variables
-    django_vars = dict()
-    django_vars['DJANGO_SETTINGS_MODULE'] = 'config.settings.production'
-
-
+    if kwargs.get('other'):
+        django_vars = dict()
+        django_vars['DJANGO_SETTINGS_MODULE'] = 'config.settings.production'
+        django_vars['DJANGO_ALLOWED_HOSTS'] = f'{naming.heroku_app_name()}.herokuapp.com'
+        set_heroku_variables(django_vars, naming.heroku_app_name(), verbose=verbose, cwd=run_folder)
 
 if __name__ == '__main__':
     ROOT_FOLDER = Path(__file__).parent.parent.parent
@@ -151,7 +153,8 @@ if __name__ == '__main__':
     args['create_redis'] = False
     args['set_aws_variables'] = False
     args['set_secrets'] = False
-    args['create_celery_broker_url']= True
+    args['create_celery_broker_url'] = False
+    args['other'] = True
     args['bucket_name'] = 'home-automation-staging-bucket'
     args['aws_access_file'] = ROOT_FOLDER / 'output/home-automation-staging-user-access.json'
 
