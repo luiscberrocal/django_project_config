@@ -2,6 +2,8 @@
 import argparse
 import sys
 
+from django_project_config.heroku.utils import capture_input
+
 
 def main():
     # Create the parser
@@ -15,9 +17,8 @@ def main():
     # Execute the parse_args() method
     args = my_parser.parse_args()
     print(f'>>> {args.command} {args.component}')
-    name = input('Create an app in heroku [y/n]')
-    print(name)
-
+    if args.command == 'config' and args.component == 'heroku':
+        capture_input()
 
 if __name__ == "__main__":
     """
