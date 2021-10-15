@@ -24,7 +24,8 @@ def capture_input(*args, **kwargs):
     data['create_heroku_app'] = {'question': 'Create Heroku app',
                                  'default': 'Y', 'choices': ['y', 'n']}
 
-    # data['create_heroku_app'] = False
+    data['create_postgresql_db'] = {'question': 'Create postgres database',
+                                 'default': 'Y', 'choices': ['y', 'n']}
     # data['create_postgresql_db'] = False
     # data['create_redis'] = False
     # data['set_aws_variables'] = False
@@ -47,6 +48,10 @@ def capture_input(*args, **kwargs):
         question['value'] = input(msg)
         if question['value'] == '':
             question['value'] = question['default']
+        if question['value'].lower() == 'y':
+            question['value'] = True
+        elif question['value'].lower() == 'n':
+            question['value'] = False
 
     print(data)
 
