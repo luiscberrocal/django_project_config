@@ -22,14 +22,15 @@ def create_heroku_app(app_name, **kwargs):
         display_results(results, errors, title='CREATE HEROKU APP')
 
 
-def create_postgresql_db(postgres_level, **kwargs):
+def create_postgresql_db(postgres_level: str, app_name: str, run_folder: Path,
+                         verbose: bool = False, **kwargs):
     """
-     heroku addons:create heroku-postgresql:hobby-dev
+     heroku addons:create heroku-postgresql:hobby-dev -a {{django_project_slug}}
     """
-    verbose = kwargs.get('verbose', False)
-    cwd = kwargs.get('run_folder')
-    command = f'heroku addons:create heroku-postgresql:{postgres_level}'
-    results, errors = run_command(command, cwd=cwd)
+    # verbose = kwargs.get('verbose', False)
+    # cwd = kwargs.get('run_folder')
+    command = f'heroku addons:create heroku-postgresql:{postgres_level} -a {app_name}'
+    results, errors = run_command(command, cwd=run_folder)
     if verbose:
         display_results(results, errors, title='CREATE POSTGRES DATABASE')
 
@@ -113,7 +114,7 @@ def run_heroku_config(**kwargs):
         else:
             msg = f'Unsupported environment {environment}'
             raise DjangoProjectConfigException(msg)
-        create_postgresql_db(level, verbose=verbose, run_folder=run_folder)
+        create_postgresql_db(level, naming.heroku_app_name(), run_folder, verbose=verbose, )
     # STEP 03 Create REDIS
     if kwargs.get('create_redis'):
         if environment == 'staging':
@@ -140,23 +141,24 @@ def run_heroku_config(**kwargs):
         django_vars['DJANGO_ALLOWED_HOSTS'] = f'{naming.heroku_app_name()}.herokuapp.com'
         set_heroku_variables(django_vars, naming.heroku_app_name(), verbose=verbose, cwd=run_folder)
 
+
 if __name__ == '__main__':
     ROOT_FOLDER = Path(__file__).parent.parent.parent
 
     args = dict()
     args['verbose'] = True
-    args['base_slug'] = 'home_auto_507_pty'
+    args['base_slug'] = 'ganexa_event_manager'
     args['environment'] = 'staging'
     args['target_folder'] = ROOT_FOLDER / 'output'
     args['create_heroku_app'] = False
     args['create_postgresql_db'] = False
     args['create_redis'] = False
-    args['set_aws_variables'] = False
-    args['set_secrets'] = False
-    args['create_celery_broker_url'] = False
+    args['set_aws_variables'] = True
+    args['set_secrets'] = True
+    args['create_celery_broker_url'] = True
     args['other'] = True
-    args['bucket_name'] = 'home-automation-staging-bucket'
-    args['aws_access_file'] = ROOT_FOLDER / 'output/home-automation-staging-user-access.json'
+    args['bucket_name'] = f'{args["base_slug"].replace("_", "-")}-staging-bucket'
+    args['aws_access_file'] = ROOT_FOLDER / 'output/ganexa-event-manager-staging-user-access.json'
 
     args['run_folder'] = ROOT_FOLDER
     print(f'>>>> {ROOT_FOLDER}')

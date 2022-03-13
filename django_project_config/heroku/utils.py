@@ -23,12 +23,12 @@ def capture_input(*args, **kwargs):
     data['target_folder'] = {'question': 'Target folder', 'default': 'output'}
     data['create_heroku_app'] = {'question': 'Create Heroku app',
                                  'default': 'Y', 'choices': ['y', 'n']}
-
     data['create_postgresql_db'] = {'question': 'Create postgres database',
+                                    'default': 'Y', 'choices': ['y', 'n']}
+    data['create_redis'] = {'question': 'Create Redis database',
+                            'default': 'Y', 'choices': ['y', 'n']}
+    data['set_aws_variables'] = {'question': 'Set AWS variables.',
                                  'default': 'Y', 'choices': ['y', 'n']}
-    # data['create_postgresql_db'] = False
-    # data['create_redis'] = False
-    # data['set_aws_variables'] = False
     # data['set_secrets'] = False
     # data['create_celery_broker_url'] = False
     # data['other'] = True

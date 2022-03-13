@@ -165,7 +165,7 @@ def add_user_to_group(username, aws_group, **kwargs):
 
 
 if __name__ == '__main__':
-    slug = 'home_automation'
+    slug = 'ganexa_event_manager'
     environment = 'staging'
     ROOT_FOLDER = Path(__file__).parent.parent.parent
     print(f'>>> {ROOT_FOLDER}')
@@ -174,6 +174,7 @@ if __name__ == '__main__':
     bucket = naming.bucket_name()
     group = naming.group()
     username = naming.username()
+
     # STEP 01 Create Bucket
     if 1 == 0:
         create_bucket(bucket, verbose=True)
@@ -184,15 +185,15 @@ if __name__ == '__main__':
     if 1 == 0:
         create_policy_file(naming.policy_filename(), bucket, verbose=True)
         create_policy(naming.policy_filename(), bucket, verbose=True)
-    # STEP 04 Create an assing arn policy
+    # STEP 04 Create and assign arn policy
     if 1 == 0:
         create_policy_arn_script(naming.arn_script_filename(), bucket, group, verbose=True)
         execute_arn_script(naming.arn_script_filename(), verbose=True)
     # STEP 05 Creating user
-    if 1 == 0:
+    if 1 == 1:
         create_user(username, verbose=True)
-    # STEP 06 Create access ky
-    if 1 == 0:
+    # STEP 06 Create access key
+    if 1 == 1:
         create_access_key(username, naming.access_filename(), verbose=True)
 
     # STEP 07 Add user to the group

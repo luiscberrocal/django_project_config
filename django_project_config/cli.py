@@ -12,7 +12,7 @@ def main():
     # Add the arguments
     my_parser.add_argument('command', metavar='command', type=str, help='Command')
     my_parser.add_argument('component', metavar='component', type=str,
-                           help='Compponent to apply the comand to')
+                           help='Component to apply the command to')
 
     # Execute the parse_args() method
     args = my_parser.parse_args()
